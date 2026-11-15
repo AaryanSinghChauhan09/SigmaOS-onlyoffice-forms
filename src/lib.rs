@@ -47,23 +47,40 @@ pub struct OnlyofficeFormsManager {
 
 impl OnlyofficeFormsManager {
     pub fn new(name: &str) -> Self {
-        Self { name: name.to_string(), items: BTreeMap::new(), configs: BTreeMap::new() }
+        Self {
+            name: name.to_string(),
+            items: BTreeMap::new(),
+            configs: BTreeMap::new(),
+        }
     }
 
     pub fn add_item(&mut self, item: OoForm) -> Result<(), OnlyofficeFormsError> {
-        if item.name.is_empty() { return Err(OnlyofficeFormsError::EmptyName); }
-        if self.items.contains_key(&item.id) { return Err(OnlyofficeFormsError::Duplicate(item.id.clone())); }
+        if item.name.is_empty() {
+            return Err(OnlyofficeFormsError::EmptyName);
+        }
+        if self.items.contains_key(&item.id) {
+            return Err(OnlyofficeFormsError::Duplicate(item.id.clone()));
+        }
         self.items.insert(item.id.clone(), item);
         Ok(())
     }
 
-    pub fn get_item(&self, id: &str) -> Option<&OoForm> { self.items.get(id) }
-    pub fn count(&self) -> usize { self.items.len() }
-    pub fn add_config(&mut self, cfg: OoField) { self.configs.insert(cfg.id.clone(), cfg); }
-    pub fn config_count(&self) -> usize { self.configs.len() }
+    pub fn get_item(&self, id: &str) -> Option<&OoForm> {
+        self.items.get(id)
+    }
+    pub fn count(&self) -> usize {
+        self.items.len()
+    }
+    pub fn add_config(&mut self, cfg: OoField) {
+        self.configs.insert(cfg.id.clone(), cfg);
+    }
+    pub fn config_count(&self) -> usize {
+        self.configs.len()
+    }
 
     pub fn set_enabled(&mut self, id: &str, enabled: bool) -> Result<(), OnlyofficeFormsError> {
-        self.items.get_mut(id)
+        self.items
+            .get_mut(id)
             .map(|i| i.enabled = enabled)
             .ok_or_else(|| OnlyofficeFormsError::NotFound(id.to_string()))
     }
@@ -74,11 +91,20 @@ mod tests {
     use super::*;
 
     fn make_item(id: &str, name: &str) -> OoForm {
-        OoForm { id: id.to_string(), name: name.to_string(), form_type: "default".to_string(), enabled: true }
+        OoForm {
+            id: id.to_string(),
+            name: name.to_string(),
+            form_type: "default".to_string(),
+            enabled: true,
+        }
     }
 
     fn make_config(id: &str) -> OoField {
-        OoField { id: id.to_string(), field_type: "val".to_string(), description: format!("{} desc", id) }
+        OoField {
+            id: id.to_string(),
+            field_type: "val".to_string(),
+            description: format!("{} desc", id),
+        }
     }
 
     #[test]
@@ -98,14 +124,20 @@ mod tests {
     #[test]
     fn test_empty_rejected_aaa() {
         let mut mgr = OnlyofficeFormsManager::new("test");
-        assert_eq!(mgr.add_item(make_item("i1", "")), Err(OnlyofficeFormsError::EmptyName));
+        assert_eq!(
+            mgr.add_item(make_item("i1", "")),
+            Err(OnlyofficeFormsError::EmptyName)
+        );
     }
 
     #[test]
     fn test_duplicate_rejected_aaa() {
         let mut mgr = OnlyofficeFormsManager::new("test");
         mgr.add_item(make_item("i1", "First")).unwrap();
-        assert_eq!(mgr.add_item(make_item("i1", "Dup")), Err(OnlyofficeFormsError::Duplicate("i1".to_string())));
+        assert_eq!(
+            mgr.add_item(make_item("i1", "Dup")),
+            Err(OnlyofficeFormsError::Duplicate("i1".to_string()))
+        );
     }
 
     #[test]
@@ -129,6 +161,9 @@ mod tests {
         mgr.add_item(make_item("i1", "First")).unwrap();
         assert!(mgr.set_enabled("i1", false).is_ok());
         assert!(!mgr.get_item("i1").unwrap().enabled);
-        assert_eq!(mgr.set_enabled("none", true), Err(OnlyofficeFormsError::NotFound("none".to_string())));
+        assert_eq!(
+            mgr.set_enabled("none", true),
+            Err(OnlyofficeFormsError::NotFound("none".to_string()))
+        );
     }
 }
