@@ -3,7 +3,7 @@ name = "SigmaOS-onlyoffice-forms"
 tier = 2
 stability = "scaffold"
 language = "rust"
-description = "onlyoffice-forms component"
+description = "SigmaOS OnlyOffice component - Rust implementation with AAA tests"
 upstream = []
 
 [contract]
